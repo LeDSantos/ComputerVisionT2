@@ -23,7 +23,7 @@ from matplotlib import pyplot as plt
 # imagens recup eradas foram afetadas p or essas transformações. Dica: você pode usar as rotinas
 # getRotationMatrix2D e warpAffine do Op enCV.
 
-PATH_TO_IMGS = "./images/"
+PATH_TO_IMGS = "/images/"
 
 if __name__ == "__main__":
 
