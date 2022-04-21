@@ -11,6 +11,10 @@ from matplotlib import pyplot as plt
 from random import seed
 from random import random
 
+from operator import itemgetter
+
+from sqlalchemy import true
+
 # Enunciado: o problema de Content-based image retrieval (CBIR) consiste em fornecer uma
 # imagem de consulta e recuperar imagens semelhantes em uma base de dados. O conceito de
 # semelhante depende da aplicação, normalmente envolvendo informação de cor, textura e forma.
@@ -29,19 +33,42 @@ from random import random
 PATH_TO_IMGS = "./images/"
 
 class CBIR:
-    def __init__(self):
+    def __init__(self, search_img, N):
 
         files = self.openDir()
 
+        resul=[]
         for img_file in files:
             # Carrega imagem
-            img = cv2.imread(img_file)
-            print("Usando imagem: "+img_file)
+            img = cv2.imread(img_file, 0)
+            # print("Usando imagem: "+img_file)
             img_file_out=img_file.split("/")[-1]
+            local_resul=[]
             # cv2.imshow('Imagem '+img_file_out, img)
             # cv2.waitKey()
             # cv2.destroyAllWindows()
-        
+
+            ret, thresh = cv2.threshold(search_img, 127, 255,0)
+            ret, thresh2 = cv2.threshold(img, 127, 255,0)
+            contours,hierarchy = cv2.findContours(thresh,2,1)
+            cnt1 = contours[0]
+            contours,hierarchy = cv2.findContours(thresh2,2,1)
+            cnt2 = contours[0]
+
+            ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
+            local_resul.append(ret)
+            local_resul.append(img_file_out)
+            # print(ret)
+            resul.append(local_resul)
+
+        output = sorted(resul, key = lambda x:float(x[0]))#key=lambda x:x[0]
+
+        print("Menores diferenças")
+        limited_output = []
+        for i in range(N):
+            print(output[i])
+            limited_output.append(output[i])
+
         print("CBIR executado")
 
 
@@ -94,6 +121,8 @@ if __name__ == "__main__":
 
     seed(1)
 
+    img = cv2.imread(PATH_TO_IMGS+'bird02.pgm', 0)
     # print("teste")
-    # CBIR().openDir()
-    TestImage()
+    CBIR(img, 5).openDir()
+
+    # TestImage()
