@@ -23,8 +23,31 @@ from matplotlib import pyplot as plt
 # imagens recup eradas foram afetadas p or essas transformações. Dica: você pode usar as rotinas
 # getRotationMatrix2D e warpAffine do Op enCV.
 
-PATH_TO_IMGS = "/images/"
+PATH_TO_IMGS = "./images/"
+
+class CBIR:
+    def __init__(self):
+
+        files = self.openDir()
+
+        for img_file in files:
+            # Carrega imagem
+            img = cv2.imread(img_file)
+            print("Usando imagem: "+img_file)
+            img_file_out=img_file.split("/")[-1]
+            # cv2.imshow('Imagem '+img_file_out, img)
+            # cv2.waitKey()
+            # cv2.destroyAllWindows()
+        
+        print("CBIR executado")
+
+
+    def openDir(self):
+        files = glob.glob(PATH_TO_IMGS+"*.pgm")
+        # print(files)
+        return files
 
 if __name__ == "__main__":
 
-    print("teste")
+    # print("teste")
+    CBIR().openDir()
