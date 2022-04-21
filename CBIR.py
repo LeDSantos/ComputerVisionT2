@@ -35,12 +35,15 @@ PATH_TO_IMGS = "./images/"
 class CBIR:
     def __init__(self, search_img, N):
 
+        search_img_mod = Random_RotationScale(search_img)
+
         files = self.openDir()
 
         resul=[]
         for img_file in files:
             # Carrega imagem
             img = cv2.imread(img_file, 0)
+            img_mod = Random_RotationScale(img)
             # print("Usando imagem: "+img_file)
             img_file_out=img_file.split("/")[-1]
             local_resul=[]
@@ -48,8 +51,8 @@ class CBIR:
             # cv2.waitKey()
             # cv2.destroyAllWindows()
 
-            ret, thresh = cv2.threshold(search_img, 127, 255,0)
-            ret, thresh2 = cv2.threshold(img, 127, 255,0)
+            ret, thresh = cv2.threshold(search_img_mod, 127, 255,0)
+            ret, thresh2 = cv2.threshold(img_mod, 127, 255,0)
             contours,hierarchy = cv2.findContours(thresh,2,1)
             cnt1 = contours[0]
             contours,hierarchy = cv2.findContours(thresh2,2,1)
@@ -90,7 +93,7 @@ def TestImage():
 def Random_RotationScale(original_img):
     scale = 0.85 + (random() * (1.15 - 0.85)) # [0.85, 1.15]
     rotation = random() * 360 # [0, 360 graus]
-    print("Scale: ",scale, " --- Rotation: ", rotation, "degrees")
+    # print("Scale: ",scale, " --- Rotation: ", rotation, "degrees")
 
     # Extracting height and width from image shape
     height, width = original_img.shape[:2]
