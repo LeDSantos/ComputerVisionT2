@@ -35,30 +35,57 @@ PATH_TO_IMGS = "./images/"
 class CBIR:
     def __init__(self, search_img, N):
 
-        search_img_mod = Random_RotationScale(search_img)
+        search_img_mod_inv = Random_RotationScale(search_img)
+        search_img_mod = cv2.bitwise_not(search_img_mod_inv)
+        ret, thresh = cv2.threshold(search_img_mod, 127, 255,0)
+
+        contours,hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        cnt1 = contours[0]
+        search_img_mod_color = cv2.cvtColor(search_img_mod, cv2.COLOR_GRAY2BGR)
+        cv2.drawContours(search_img_mod_color, cnt1, -1, (0,255,0), 3)
+
+        search_img_mod_color = cv2.cvtColor(search_img_mod, cv2.COLOR_GRAY2BGR)
+        cv2.drawContours(search_img_mod_color, contours, -1, (0,255,0), 3)
+        cv2.imshow('Imagem principal', search_img_mod_color)
+
+        # edged = cv2.Canny(search_img_mod, 30, 200)
+        # ret, thresh = cv2.threshold(search_img_mod, 127, 255, 0)
+        # contours, hierarchy = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        # cv2.imshow('Canny Edges After Contouring', edged)
+        # cv2.drawContours(search_img_mod_color, contours, -1, (0,255,0), 3)
+        # cv2.imshow('Imagem Canny', search_img_mod_color)
+
+        cv2.waitKey()
+        cv2.destroyAllWindows()
 
         files = self.openDir()
 
         resul=[]
         for img_file in files:
+            local_resul=[]
+
             # Carrega imagem
-            img = cv2.imread(img_file, 0)
-            img_mod = Random_RotationScale(img)
+            img = cv2.imread(img_file, cv2.IMREAD_GRAYSCALE)
+            img_mod_inv = Random_RotationScale(img)
+            img_mod = cv2.bitwise_not(img_mod_inv)
             # print("Usando imagem: "+img_file)
             img_file_out=img_file.split("/")[-1]
-            local_resul=[]
             # cv2.imshow('Imagem '+img_file_out, img)
             # cv2.waitKey()
             # cv2.destroyAllWindows()
 
-            ret, thresh = cv2.threshold(search_img_mod, 127, 255,0)
             ret, thresh2 = cv2.threshold(img_mod, 127, 255,0)
-            contours,hierarchy = cv2.findContours(thresh,2,1)
-            cnt1 = contours[0]
-            contours,hierarchy = cv2.findContours(thresh2,2,1)
+
+            contours,hierarchy = cv2.findContours(thresh2, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
             cnt2 = contours[0]
 
-            ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
+            # img_mod_color = cv2.cvtColor(img_mod, cv2.COLOR_GRAY2BGR)
+            # cv2.drawContours(img_mod_color, contours, -1, (0,255,0), 3)
+            # cv2.imshow('Imagem compara', img_mod_color)
+            # cv2.waitKey()
+            # cv2.destroyAllWindows()
+
+            ret = cv2.matchShapes(cnt1,cnt2,cv2.CONTOURS_MATCH_I1,0.0)
             local_resul.append(ret)
             local_resul.append(img_file_out)
             # print(ret)
@@ -115,7 +142,7 @@ def Random_RotationScale(original_img):
     rotate_matrix[1, 2] += ((bound_h / 2) - center[1])
 
     # rotate the image using cv2.warpAffine rotation degree anticlockwise
-    rotated_image = cv2.warpAffine(src=original_img, M=rotate_matrix, dsize=(bound_w, bound_h))
+    rotated_image = cv2.warpAffine(src=original_img, M=rotate_matrix, dsize=(bound_w, bound_h), borderValue=(255,255,255))
   
     return rotated_image
 
@@ -124,8 +151,8 @@ if __name__ == "__main__":
 
     seed(1)
 
-    img = cv2.imread(PATH_TO_IMGS+'bird02.pgm', 0)
+    imgray = cv2.imread(PATH_TO_IMGS+'bird02.pgm', cv2.IMREAD_GRAYSCALE)
     # print("teste")
-    CBIR(img, 5).openDir()
+    CBIR(imgray, 10).openDir()
 
     # TestImage()
