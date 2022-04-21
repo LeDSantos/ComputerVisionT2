@@ -35,7 +35,7 @@ PATH_TO_IMGS = "./images/"
 class CBIR:
     def __init__(self, search_img, N):
 
-        search_img_mod_inv = Random_RotationScale(search_img)
+        search_img_mod_inv = search_img#Random_RotationScale(search_img)
         search_img_mod = cv2.bitwise_not(search_img_mod_inv)
         ret, thresh = cv2.threshold(search_img_mod, 127, 255,0)
 
@@ -66,7 +66,7 @@ class CBIR:
 
             # Carrega imagem
             img = cv2.imread(img_file, cv2.IMREAD_GRAYSCALE)
-            img_mod_inv = Random_RotationScale(img)
+            img_mod_inv = img#Random_RotationScale(img)
             img_mod = cv2.bitwise_not(img_mod_inv)
             # print("Usando imagem: "+img_file)
             img_file_out=img_file.split("/")[-1]
