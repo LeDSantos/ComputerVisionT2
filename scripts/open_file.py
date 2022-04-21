@@ -23,13 +23,6 @@ class OpenFile:
         ret, threshold = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         ret, img_tst = cv2.threshold(img_tst, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         threshold = cv2.bitwise_not(threshold)
-        
-        #SOBEL PARA PEGAR O CONTORNO DA input_img
-        # grad_sobel_x = cv2.Sobel(threshold, cv2.CV_16S, 1, 0, ksize=1, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
-        # grad_sobel_y = cv2.Sobel(threshold, cv2.CV_16S, 0, 1, ksize=1, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
-        # abs_grad_x = cv2.convertScaleAbs(grad_sobel_x)
-        # abs_grad_y = cv2.convertScaleAbs(grad_sobel_y)
-        # grad = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
 
         #MASCARA COM INVERSO DA input_img
         outer = np.zeros(threshold.shape, dtype="uint8")
@@ -38,29 +31,10 @@ class OpenFile:
         contour = sorted(contour, key=cv2.contourArea, reverse = True)[0]
         cv2.drawContours(outer, [contour], -1, 255, -1)
 
-        # cv2.imshow("SOBEL", cv2.resize(grad,(600,400)))
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
-        # cv2.imshow("OUTER",outer)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
-        # x,y = grad.shape
-        # img_tst = cv2.resize(img_tst,(y,x))
-        # img_result = grad - img_tst
-
-        # cv2.imshow("RESULT_SOBEL", np.ones(outer.shape,dtype="uint8"))
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
 
         x,y = outer.shape
         img_tst = cv2.resize(img_tst,(y,x))
-        # img_result = outer - img_tst
         img_result = cv2.subtract(outer,img_tst)
-        # print(outer[0][0])
-        # print(img_tst[0][0])
-        # print(img_result[0][0])
         
         img_result = cv2.bitwise_not(img_result)
         ret, img_result = cv2.threshold(img_result, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -69,10 +43,6 @@ class OpenFile:
         eucli_sum = 0
         for xi in range(0,x-1):
             for yi in range(0,y-1):
-                # if np.square((int(img_result[xi][yi]) - int(img_tst[xi][yi]))) <= 1:
-                #     eucli_sum = eucli_sum + 0
-                # else:
-                #     eucli_sum = eucli_sum + np.square((int(img_result[xi][yi]) - int(img_tst[xi][yi])))
                 eucli_sum = eucli_sum + np.square((int(img_result[xi][yi]) - int(img_tst[xi][yi])))
         eucli = np.sqrt(eucli_sum)
         print(str(N) + " | DISTANCIA EUCLIDINA ENTRE AS IMAGENS: " + str(eucli))
@@ -90,8 +60,8 @@ class OpenFile:
         eucli_fd = np.sqrt(eucli_fd)
 
         print("DISTANCIA EUCLIDIANA DOS FDS: " + str(eucli_fd))
-        if (eucli_fd <= THRESHOLD_QUERY):
-            display_img = np.hstack((img_gray,img_tst,outer,hog_image_query, hog_image_database))
+        # if (eucli_fd <= THRESHOLD_QUERY):
+            # display_img = np.hstack((img_gray,img_tst,outer,hog_image_query, hog_image_database))
             # similar.append(eucli_fd)
             # cv2.imshow("RESULTS", cv2.resize(display_img,(1200,200)))
             # cv2.imwrite("output_"+str(cont)+".jpg",display_img)
