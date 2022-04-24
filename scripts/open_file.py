@@ -23,19 +23,77 @@ class OpenFile:
         files = glob.glob(PATH_TO_IMGS+"*.pgm")
         return files
     
-    def make_descriptors(self, input_img_path, input_img_test_path):
+    def process_seach_img(self, input_img_path):
+
         img_gray = cv2.imread(input_img_path, cv2.COLOR_BGR2GRAY)
-        img_tst = cv2.imread(input_img_test_path, cv2.COLOR_BGR2GRAY)
         ret, threshold = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        ret, img_tst = cv2.threshold(img_tst, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         threshold = cv2.bitwise_not(threshold)
 
-        x,y = threshold.shape
-        img_tst = cv2.resize(img_tst,(y,x))
+        shape_x, shape_y = threshold.shape
 
         #DESCRITOR HOG
         fd_q, hog_image_query = hog(img_gray, orientations=9, pixels_per_cell=(8, 8),
                 	cells_per_block=(2, 2), visualize=True, multichannel=False)
+
+        #GAUSSIAN BLUR PARA CONSIDERAÇÃO DE AUMENTO NA IMAGEM
+        img_blur1_input = cv2.GaussianBlur(img_gray,(1,1),0)
+        img_blur3_input = cv2.GaussianBlur(img_gray,(3,3),0)
+        img_blur5_input = cv2.GaussianBlur(img_gray,(5,5),0)
+
+        #ROTAÇÃO NA IMAGEM
+        rotated_imgs = []
+        for ind in range(45,360,45):
+            rotaded = self.RotationScale(img_gray,ind)
+            rotated_imgs.append(rotaded)
+        
+        #DETECÇÃO DE BORDAS COM CANNY
+        canny_input = cv2.Canny(img_blur3_input,225,250)
+
+        return (shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input)
+
+    def process_seach_img_MOD(self, input_img_path):
+
+        img_gray = cv2.imread(input_img_path, cv2.COLOR_BGR2GRAY)
+        img_gray = self.Random_RotationScale(img_gray)
+        
+        ret, threshold = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        threshold = cv2.bitwise_not(threshold)
+
+        shape_x, shape_y = threshold.shape
+
+        #DESCRITOR HOG
+        fd_q, hog_image_query = hog(img_gray, orientations=9, pixels_per_cell=(8, 8),
+                	cells_per_block=(2, 2), visualize=True, multichannel=False)
+
+        #GAUSSIAN BLUR PARA CONSIDERAÇÃO DE AUMENTO NA IMAGEM
+        img_blur1_input = cv2.GaussianBlur(img_gray,(1,1),0)
+        img_blur3_input = cv2.GaussianBlur(img_gray,(3,3),0)        
+        img_blur5_input = cv2.GaussianBlur(img_gray,(5,5),0)
+
+        #ROTAÇÃO NA IMAGEM
+        rotated_imgs = []
+        for ind in range(45,360,45):
+            rotaded = self.RotationScale(img_gray,ind)
+            rotated_imgs.append(rotaded)
+ 
+        #DETECÇÃO DE BORDAS COM CANNY
+        canny_input = cv2.Canny(img_blur3_input,225,250)
+
+        return (shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input)
+
+    def make_descriptors(self, input_img_path, shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input, input_img_test_path):
+        # img_gray = cv2.imread(input_img_path, cv2.COLOR_BGR2GRAY)
+        img_tst = cv2.imread(input_img_test_path, cv2.COLOR_BGR2GRAY)
+        # ret, threshold = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        ret, img_tst = cv2.threshold(img_tst, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        # threshold = cv2.bitwise_not(threshold)
+
+        x,y = shape_x, shape_y# threshold.shape
+        img_tst = cv2.resize(img_tst,(y,x))
+
+        #DESCRITOR HOG
+        # fd_q, hog_image_query = hog(img_gray, orientations=9, pixels_per_cell=(8, 8),
+        #         	cells_per_block=(2, 2), visualize=True, multichannel=False)
 
         fd_db, hog_image_database = hog(img_tst, orientations=9, pixels_per_cell=(8, 8),
                 	cells_per_block=(2, 2), visualize=True, multichannel=False)
@@ -51,17 +109,17 @@ class OpenFile:
 
 
         #GAUSSIAN BLUR PARA CONSIDERAÇÃO DE AUMENTO NA IMAGEM
-        img_blur1_input = cv2.GaussianBlur(img_gray,(1,1),0)
+        # img_blur1_input = cv2.GaussianBlur(img_gray,(1,1),0)
         erro1_mse = self.mse_2imgs(img_tst,img_blur1_input,input_img_path,"IMG_BLUR1")
         blur1_eucli = self.euclidean_2D(img_blur1_input,img_tst)
         cos_blur1 = distance.cosine(img_blur1_input.flatten(),img_tst.flatten())
 
-        img_blur3_input = cv2.GaussianBlur(img_gray,(3,3),0)
+        # img_blur3_input = cv2.GaussianBlur(img_gray,(3,3),0)
         erro3_mse = self.mse_2imgs(img_tst,img_blur3_input,input_img_path,"IMG_BLUR3")
         blur3_eucli = self.euclidean_2D(img_blur3_input,img_tst)
         cos_blur3 = distance.cosine(img_blur1_input.flatten(),img_tst.flatten())
         
-        img_blur5_input = cv2.GaussianBlur(img_gray,(5,5),0)
+        # img_blur5_input = cv2.GaussianBlur(img_gray,(5,5),0)
         erro5_mse = self.mse_2imgs(img_tst,img_blur5_input,input_img_path,"IMG_BLUR5")
         blur5_eucli = self.euclidean_2D(img_blur5_input,img_tst)
         cos_blur5 = distance.cosine(img_blur1_input.flatten(),img_tst.flatten())
@@ -69,8 +127,8 @@ class OpenFile:
 
         #ROTAÇÃO NA IMAGEM
         rotate_values = []
-        for ind in range(45,360,45):
-            rotaded = self.RotationScale(img_gray,ind)
+        for it in range(len(rotated_imgs)):
+            rotaded = rotated_imgs[it]
             img_tst_resize = cv2.resize(img_tst,(rotaded.shape[0],rotaded.shape[1]))
             if rotaded.shape[0] != img_tst_resize.shape[0]:
                 img_tst_resize = cv2.resize(img_tst,(rotaded.shape[1],rotaded.shape[0]))
@@ -96,27 +154,27 @@ class OpenFile:
         rot180_eucli,rot225_eucli,rot270_eucli,rot315_eucli,canny_eucli,erro1_mse,erro3_mse,erro5_mse,
         cos_blur1,cos_blur3,cos_blur5)
     
-    def make_descriptors_MOD(self, input_img_path, input_img_test_path):
-        img_gray = cv2.imread(input_img_path, cv2.COLOR_BGR2GRAY)
+    def make_descriptors_MOD(self, input_img_path, shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input, input_img_test_path):
+        # img_gray = cv2.imread(input_img_path, cv2.COLOR_BGR2GRAY)
         img_tst = cv2.imread(input_img_test_path, cv2.COLOR_BGR2GRAY)
 
-        img_gray = self.Random_RotationScale(img_gray)
+        # img_gray = self.Random_RotationScale(img_gray)
         img_tst = self.Random_RotationScale(img_tst)
 
         # cv2.imshow("ESCALA/ROTACAO",cv2.hconcat((img_gray,cv2.resize(img_tst,(img_gray.shape[0],img_gray.shape[0])))))
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-        ret, threshold = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        # ret, threshold = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         ret, img_tst = cv2.threshold(img_tst, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        threshold = cv2.bitwise_not(threshold)
+        # threshold = cv2.bitwise_not(threshold)
 
-        x,y = threshold.shape
+        x,y = shape_x, shape_y
         img_tst = cv2.resize(img_tst,(y,x))
 
         #DESCRITOR HOG
-        fd_q, hog_image_query = hog(img_gray, orientations=9, pixels_per_cell=(8, 8),
-                	cells_per_block=(2, 2), visualize=True, multichannel=False)
+        # fd_q, hog_image_query = hog(img_gray, orientations=9, pixels_per_cell=(8, 8),
+        #         	cells_per_block=(2, 2), visualize=True, multichannel=False)
 
         fd_db, hog_image_database = hog(img_tst, orientations=9, pixels_per_cell=(8, 8),
                 	cells_per_block=(2, 2), visualize=True, multichannel=False)
@@ -132,17 +190,17 @@ class OpenFile:
 
 
         #GAUSSIAN BLUR PARA CONSIDERAÇÃO DE AUMENTO NA IMAGEM
-        img_blur1_input = cv2.GaussianBlur(img_gray,(1,1),0)
+        # img_blur1_input = cv2.GaussianBlur(img_gray,(1,1),0)
         erro1_mse = self.mse_2imgs(img_tst,img_blur1_input,input_img_path,"IMG_BLUR1")
         blur1_eucli = self.euclidean_2D(img_blur1_input,img_tst)
         cos_blur1 = distance.cosine(img_blur1_input.flatten(),img_tst.flatten())
 
-        img_blur3_input = cv2.GaussianBlur(img_gray,(3,3),0)
+        # img_blur3_input = cv2.GaussianBlur(img_gray,(3,3),0)
         erro3_mse = self.mse_2imgs(img_tst,img_blur3_input,input_img_path,"IMG_BLUR3")
         blur3_eucli = self.euclidean_2D(img_blur3_input,img_tst)
         cos_blur3 = distance.cosine(img_blur1_input.flatten(),img_tst.flatten())
         
-        img_blur5_input = cv2.GaussianBlur(img_gray,(5,5),0)
+        # img_blur5_input = cv2.GaussianBlur(img_gray,(5,5),0)
         erro5_mse = self.mse_2imgs(img_tst,img_blur5_input,input_img_path,"IMG_BLUR5")
         blur5_eucli = self.euclidean_2D(img_blur5_input,img_tst)
         cos_blur5 = distance.cosine(img_blur1_input.flatten(),img_tst.flatten())
@@ -150,8 +208,8 @@ class OpenFile:
 
         #ROTAÇÃO NA IMAGEM
         rotate_values = []
-        for ind in range(45,360,45):
-            rotaded = self.RotationScale(img_gray,ind)
+        for ind in range(len(rotated_imgs)):#range(45,360,45):
+            rotaded = rotated_imgs[ind] #self.RotationScale(img_gray,ind)
             img_tst_resize = cv2.resize(img_tst,(rotaded.shape[0],rotaded.shape[1]))
             if rotaded.shape[0] != img_tst_resize.shape[0]:
                 img_tst_resize = cv2.resize(img_tst,(rotaded.shape[1],rotaded.shape[0]))
@@ -203,25 +261,25 @@ class OpenFile:
         eucli = np.sqrt(eucli_sum)
         return eucli
 
-    def find_related_imgs(self,query,imgv):
+    def find_related_imgs(self, query, shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input,imgv):
         similar_fd = []
         for img in imgv:
 
             [eucli_fd,img_path,mse_fd,cos_fd,blur1_eucli,blur3_eucli,blur5_eucli,
             rot45_eucli,rot90_eucli,rot135_eucli,rot180_eucli,rot225_eucli,rot270_eucli,
-            rot315_eucli,canny_eucli,erro1_mse,erro3_mse,erro5_mse,cos_blur1,cos_blur3,cos_blur5] = of.make_descriptors(query,img)
+            rot315_eucli,canny_eucli,erro1_mse,erro3_mse,erro5_mse,cos_blur1,cos_blur3,cos_blur5] = of.make_descriptors(query, shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input,img)
             
             similar_fd.append((img_path,eucli_fd,mse_fd,cos_fd,blur1_eucli,blur3_eucli,blur5_eucli,rot45_eucli,
             rot90_eucli,rot135_eucli,rot180_eucli,rot225_eucli,rot270_eucli,rot315_eucli,canny_eucli,erro1_mse,
             erro3_mse,erro5_mse,cos_blur1,cos_blur3,cos_blur5))
         return similar_fd
     
-    def find_related_imgs_MOD(self,query,imgv):
+    def find_related_imgs_MOD(self, query, shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input,imgv):
         similar_fd = []
         for img in imgv:
             [eucli_fd,img_path,mse_fd,cos_fd,blur1_eucli,blur3_eucli,blur5_eucli,
             rot45_eucli,rot90_eucli,rot135_eucli,rot180_eucli,rot225_eucli,rot270_eucli,
-            rot315_eucli,canny_eucli,erro1_mse,erro3_mse,erro5_mse,cos_blur1,cos_blur3,cos_blur5] = of.make_descriptors_MOD(query,img)
+            rot315_eucli,canny_eucli,erro1_mse,erro3_mse,erro5_mse,cos_blur1,cos_blur3,cos_blur5] = of.make_descriptors_MOD(query, shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input,img)
             
             similar_fd.append((img_path,eucli_fd,mse_fd,cos_fd,blur1_eucli,blur3_eucli,blur5_eucli,rot45_eucli,
             rot90_eucli,rot135_eucli,rot180_eucli,rot225_eucli,rot270_eucli,rot315_eucli,canny_eucli,erro1_mse,
@@ -346,8 +404,10 @@ class OpenFile:
         
         query = input_img
         
+        (shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input) = self.process_seach_img(input_img)
+
         similar_fd = []
-        similar_fd = self.find_related_imgs(query,img_files)
+        similar_fd = self.find_related_imgs(query, shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input,img_files)
 
         similar_fd = self.evaluate_results(similar_fd,N,sys.argv[1])
         save_result = sys.argv[3]
@@ -357,15 +417,15 @@ class OpenFile:
         img_files = self.search_file()
         
         query = input_img
-        
+           
+        (shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input) = self.process_seach_img_MOD(input_img)
+    
         similar_fd = []
-        similar_fd = self.find_related_imgs_MOD(query,img_files)
+        similar_fd = self.find_related_imgs_MOD(query, shape_x, shape_y, fd_q, img_blur1_input, img_blur3_input, img_blur5_input, rotated_imgs, canny_input,img_files)
 
         similar_fd = self.evaluate_results(similar_fd,N,sys.argv[1])
         save_result = sys.argv[3]
         self.show_related_img(query,similar_fd,int(N),int(save_result))
-
-
 
 """"
 =================ARGUMENTOSS PARA RODAR O PROGRAMA=================
@@ -384,5 +444,5 @@ if __name__ == "__main__":
 
     seed(2)
 
-    of.CBIR(PATH_TO_IMGS+str(sys.argv[1])+".pgm",sys.argv[2])
+    # of.CBIR(PATH_TO_IMGS+str(sys.argv[1])+".pgm",sys.argv[2])
     of.CBIR_MOD(PATH_TO_IMGS+str(sys.argv[1])+".pgm",sys.argv[2])
