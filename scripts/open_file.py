@@ -16,6 +16,9 @@ from skimage import exposure
 PATH_TO_IMGS = "./images/"
 THRESHOLD_QUERY = 5.5
 
+METRICS = ['eucli_fd','mse_fd','cos_fd','blur1_eucli','blur3_eucli','blur5_eucli',
+            'rot45_eucli','rot90_eucli','rot135_eucli','rot180_eucli','rot225_eucli','rot270_eucli',
+            'rot315_eucli','canny_eucli','erro1_mse','erro3_mse','erro5_mse','cos_blur1','cos_blur3','cos_blur5']
 
 class OpenFile:
     def search_file(self):
@@ -338,8 +341,9 @@ class OpenFile:
         for x in range(1,21):
             similar_fd.sort(key = operator.itemgetter(x)) 
             P,R,F = of.precision_recall(int(N),similar_fd,input_name)
-            print("P: " + str(P) + " | R: " + str(R) + " | F: " + str(F))
+            print("METRIC: "+ str(METRICS[x-1]) +" |  P: " + str(P) + " | R: " + str(R) + " | F: " + str(F))
             P_VALUE.append(P)
+        self.print_table_latex(P_VALUE)
         for x in range(0,len(P_VALUE)):
             if np.max(P_VALUE) == P_VALUE[x]:
                 print("MAX P_VALUE: "+str(np.max(P_VALUE))+" INDICE: "+str(x))
@@ -349,18 +353,33 @@ class OpenFile:
             for x in range(0,len(max_ind)):
                 similar_fd.sort(key = operator.itemgetter(max_ind[x]))
                 img.append(self.show_related_img(PATH_TO_IMGS+str(sys.argv[1])+".pgm",similar_fd,int(N),1))
-            cv2.imshow("RESULTADOS",np.concatenate(img,axis=0))
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-            # cv2.imwrite("./results/result_mod2.jpg",np.concatenate(img,axis=0))
+            # cv2.imshow("RESULTADOS",np.concatenate(img,axis=0))
+            # cv2.imshow("RESULTADOS",np.concatenate(img[0],axis=0))
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
+            # cv2.imwrite("./results/result_"+str(input_name)+".jpg",np.concatenate(img,axis=0))
+            # cv2.imwrite("./results/result_"+str(input_name)+".jpg",img[0])
         else:
             similar_fd.sort(key = operator.itemgetter(np.argmax(P_VALUE)+1))
             img = self.show_related_img(PATH_TO_IMGS+str(sys.argv[1])+".pgm",similar_fd,int(N),1)
-            cv2.imshow("RESULTADOS",img)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-            # cv2.imwrite("./results/result_mod2.jpg",img)
+            # cv2.imshow("RESULTADOS",img)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
+            # cv2.imwrite("./results/result_"+str(input_name)+".jpg",img)
         return similar_fd
+
+    def print_table_latex(self,values):
+        print("HOG & Euclidiana & "+str(values[0])+" \\\\  \\hline \n"+
+              "HOG & MSE & "+str(values[1])+" \\\\  \\hline \n"+
+              "HOG & Cosseno & "+str(values[2])+" \\\\  \\hline \n"+
+              "Rot 45 & Euclidiana & "+str(values[6])+" \\\\  \\hline \n"+
+              "Rot 90& Euclidiana & "+str(values[7])+" \\\\  \\hline \n"+
+              "Rot 135 & Euclidiana & "+str(values[8])+" \\\\  \\hline \n"+
+              "Rot 180 & Euclidiana & "+str(values[9])+" \\\\  \\hline \n"+
+              "Rot 225 & Euclidiana & "+str(values[10])+" \\\\  \\hline \n"+
+              "Rot 270 & Euclidiana & "+str(values[11])+" \\\\  \\hline \n"+
+              "Rot 315 & Euclidiana & "+str(values[12])+" \\\\  \\hline \n"+
+              "Canny & Euclidiana & "+str(values[13])+" \\\\  \\hline \n")
     
     def CBIR(self,input_img,N):
         
@@ -407,6 +426,7 @@ if __name__ == "__main__":
     of = OpenFile()
 
     seed(2)
-
-    # of.CBIR(PATH_TO_IMGS+str(sys.argv[1])+".pgm",sys.argv[2])
+    print("#################################\tCBIR\t#################################")
+    of.CBIR(PATH_TO_IMGS+str(sys.argv[1])+".pgm",sys.argv[2])
+    print("#################################\tCBIR_MOD\t#################################")
     of.CBIR_MOD(PATH_TO_IMGS+str(sys.argv[1])+".pgm",sys.argv[2])
