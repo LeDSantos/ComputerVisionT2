@@ -353,33 +353,20 @@ class OpenFile:
             for x in range(0,len(max_ind)):
                 similar_fd.sort(key = operator.itemgetter(max_ind[x]))
                 img.append(self.show_related_img(PATH_TO_IMGS+str(sys.argv[1])+".pgm",similar_fd,int(N),1))
-            # cv2.imshow("RESULTADOS",np.concatenate(img,axis=0))
+            cv2.imshow("RESULTADOS",np.concatenate(img,axis=0))
             # cv2.imshow("RESULTADOS",np.concatenate(img[0],axis=0))
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
             # cv2.imwrite("./results/result_"+str(input_name)+".jpg",np.concatenate(img,axis=0))
             # cv2.imwrite("./results/result_"+str(input_name)+".jpg",img[0])
         else:
             similar_fd.sort(key = operator.itemgetter(np.argmax(P_VALUE)+1))
             img = self.show_related_img(PATH_TO_IMGS+str(sys.argv[1])+".pgm",similar_fd,int(N),1)
-            # cv2.imshow("RESULTADOS",img)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
+            cv2.imshow("RESULTADOS",img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
             # cv2.imwrite("./results/result_"+str(input_name)+".jpg",img)
         return similar_fd
-
-    def print_table_latex(self,values):
-        print("HOG & Euclidiana & "+str(values[0])+" \\\\  \\hline \n"+
-              "HOG & MSE & "+str(values[1])+" \\\\  \\hline \n"+
-              "HOG & Cosseno & "+str(values[2])+" \\\\  \\hline \n"+
-              "Rot 45 & Euclidiana & "+str(values[6])+" \\\\  \\hline \n"+
-              "Rot 90& Euclidiana & "+str(values[7])+" \\\\  \\hline \n"+
-              "Rot 135 & Euclidiana & "+str(values[8])+" \\\\  \\hline \n"+
-              "Rot 180 & Euclidiana & "+str(values[9])+" \\\\  \\hline \n"+
-              "Rot 225 & Euclidiana & "+str(values[10])+" \\\\  \\hline \n"+
-              "Rot 270 & Euclidiana & "+str(values[11])+" \\\\  \\hline \n"+
-              "Rot 315 & Euclidiana & "+str(values[12])+" \\\\  \\hline \n"+
-              "Canny & Euclidiana & "+str(values[13])+" \\\\  \\hline \n")
     
     def CBIR(self,input_img,N):
         
