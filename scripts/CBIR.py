@@ -343,7 +343,7 @@ class OpenFile:
             P,R,F = of.precision_recall(int(N),similar_fd,input_name)
             print("METRIC: "+ str(METRICS[x-1]) +" |  P: " + str(P) + " | R: " + str(R) + " | F: " + str(F))
             P_VALUE.append(P)
-        self.print_table_latex(P_VALUE)
+        # self.print_table_latex(P_VALUE)
         for x in range(0,len(P_VALUE)):
             if np.max(P_VALUE) == P_VALUE[x]:
                 print("MAX P_VALUE: "+str(np.max(P_VALUE))+" INDICE: "+str(x))
