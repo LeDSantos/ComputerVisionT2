@@ -12,12 +12,10 @@ Para executar o script CBIR.py
 ```
 cd scripts
 python3 CBIR.py argv[1] argv[2] argv[3]
-
 ```
 
 ## ARGUMENTOSS PARA RODAR O PROGRAMA
     
-python3 CBIR.py argv[1] argv[2] argv[3]
 - argv[1] = SEARCH_IMG (Somente o nome do arquivo de entrada sem a extensão)
 - argv[2] = N (Quantidade de imagens a serem retornadas)
 - argv[3] = SHOW_RESULT (0 - Não mostra a imagem com os correspondentes | 1 - Mostra a imagem com os correpondentes)
